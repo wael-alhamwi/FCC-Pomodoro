@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>FCC-Pomodoro clock-challenge</title>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+
+    <!-- Bootstrap -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+    <!-- Google fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Orbitron" rel="stylesheet">
+
+    
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+
+    <script type="text/javascript">
+      // GLOBAL VARIABLES 
+  		var sessionInterval,breakInterval;
+      var startFlag = false;
+      var pauseFlag = false;
+      var breakFlag = false;
+      var tempStoredTime = 0;
+
+     function disableButtons(){
+          $('#reduceSessionTime').prop('disabled', true);
+          $('#increaseSessionTime').prop('disabled', true);
+          $('#reduceBreakTime').prop('disabled', true);
+          $('#increaseBreakTime').prop('disabled', true);
+          $('#start').prop('disabled', true);
+        }
+
+        function enableButtons(){
+          $('#reduceSessionTime').prop('disabled', false);
+          $('#increaseSessionTime').prop('disabled', false);
+          $('#reduceBreakTime').prop('disabled', false);
+          $('#increaseBreakTime').prop('disabled', false);
+          $('#start').prop('disabled', false);
+          $('#pause').prop('disabled', false);
+        }
+
+
+        function Break(){
+
+          if (breakFlag) {
+          startFlag = false;
+          // disable pause button
+          $('#start').prop('disabled', true);
+          $('#pause').prop('disabled', true);
+        // Set the date we're counting down to
+        var countDownDate = new Date();
+        countDownDate.setMinutes(countDownDate.getMinutes() + parseFloat($('#breakTime').html()));
+        $('#statusLabel').html("In Break");
+
+        // Update the count down every 1 second
+        breakInterval = setInterval(function() {
+          if(!pauseFlag){
+            // Get todays date and time
+            var now = new Date().getTime();
+
+            // Find the distance between now an the count down date
+            var distance = countDownDate - now;
+            console.log(distance);
+            
+            // Time calculations for days, hours, minutes and seconds
+             
+            var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            var seconds = Math.floor((distance % (1000 * 60)) / 1000) + 1; // Added a sec to fix appearance 
+
+            
+            // Output the result in an element with id="session"            
+            $('#session').html(minutes + "m " + seconds + "s ");
+            
+            // If the count down is over, write some text 
+            if (distance < 0) {
+              $('#session').html("SESSION TIME!");
+              clearInterval(breakInterval);
+              enableButtons();
+              breakFlag = false;
+              Start();
+              $('#statusLabel').html("In Session");
+            }
+          }
+        
+        }, 1000);
+        }
+      }
+
+		// Code inspired from W3 Schools
+	function Start(){
+
+  if (!startFlag) {
+    //Disable increase/Decrease buttons when it is running
+    disableButtons();
+
+    startFlag = true;
+    breakFlag = false;
+  // Set the date we're counting down to
+  var countDownDate = new Date();
+  countDownDate.setMinutes(countDownDate.getMinutes() + parseFloat($('#sessionTime').html()));
+  $('#statusLabel').html("In Session");
+
+  // Update the count down every 1 second
+  sessionInterval = setInterval(function() {
+    if(!pauseFlag){
+      // Get todays date and time
+      var now = new Date().getTime();
+
+      // Find the distance between now an the count down date
+      var distance = countDownDate - now;
+      console.log(distance);
+
+      // Time calculations for days, hours, minutes and seconds
+       
+      var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      var seconds = Math.floor((distance % (1000 * 60)) / 1000) + 1; // Added a sec to fix appearance 
+
+      
+      // Output the result in an element with id="session"
+      $('#session').html(minutes + "m " + seconds + "s ");
+      
+      // If the count down is over, write some text 
+      if (distance < 0) {
+        $('#session').html("BREAK TIME!");
+        clearInterval(sessionInterval);
+        breakFlag = true;
+        Break();
+        $('#statusLabel').html("In Break");
+      }
+    }
+  
+  }, 1000);
+  }
+}
+        
+		
+        function Reset(){  //Reset
+          clearInterval(sessionInterval);
+          clearInterval(breakInterval);
+          var st = parseFloat($('#sessionTime').html());
+          var bt = parseFloat($('#breakTime').html());
+          $('#session').html(((st < 10) ? "0"+st : st)+"m 00s");
+          $('#statusLabel').html("");
+          
+          enableButtons();
+          startFlag = false;
+          breakFlag = false;
+        }
+        // TODO: FIX AFTER SESSION IS FINISHED WHAT WILL HAPPEND // Done
+        // TODO: KEEPING PROGRAM RUNNING UNTIL IT RESETS // Done
+        // TODO: FIX PAUSE TO CONTINUE FROM WHERE IT LEFT   // Not but it's not required
+        // TODO: COMBINE ALL RESULTS IN ONE CLOCK OUTPUT  // Done
+        // TODO: TEST ALL FUNCTIONS AND BUTTONS FOR CORRECT OUTPUT // Done
+        // TODO: CLEAN UP CODE  // I JUST NEED TO MERGE Start() and Break() into one
+        // TODO: IMPLEMENT NEW LAYOUT // MIGHT COME BACK TO IT LATER
+
+
+        function Pause(){   // THIS NEED TO BE FIXED BUT IT IS NOT REQUIRED
+
+          if(pauseFlag){
+            pauseFlag = false;
+            $("#pause").html("Pause");
+            $('#statusLabel').html("In Session");
+          }else{
+            pauseFlag = true;
+            $("#pause").html("Resume");
+            $('#statusLabel').html("Paused!");
+          }
+        }
+
+        function reduceSession(){
+          var val = parseFloat($('#sessionTime').html()); // Get previous value
+          if(val > 1){   // Min Session time
+            $('#sessionTime').html(val-1);  // Increase previous value
+            var val2 = parseFloat($('#sessionTime').html());  // Get new value
+            $('#session').html(((val2 < 10) ? "0"+val2 : val2)+"m 00s");  // Show new value
+          }
+        }
+
+        function increaseSession(){
+          var val = parseFloat($('#sessionTime').html());
+          if(val < 25){  // Max Session time
+            $('#sessionTime').html(val+1);
+            var val2 = parseFloat($('#sessionTime').html());
+            $('#session').html(((val2 < 10) ? "0"+val2 : val2)+"m 00s");
+          }
+        }
+
+         function reduceBreak(){
+          var val = parseFloat($('#breakTime').html());
+          if(val > 1){   // Min Break time
+            $('#breakTime').html(val-1);
+            var val2 = parseFloat($('#breakTime').html());
+          }
+        }
+
+        function increaseBreak(){
+          var val = parseFloat($('#breakTime').html());
+          if(val < 25){  // Max Break time
+            $('#breakTime').html(val+1);
+            var val2 = parseFloat($('#breakTime').html());
+          }
+        }
+
+       
+        
+
+        $(document).ready(function() {
+
+
+            // Initialize lables
+            var bt = parseFloat($('#breakTime').html());
+            var st = parseFloat($('#sessionTime').html());
+            $('#session').html(((st < 10) ? "0"+st : st)+"m 00s");
+
+            $("#start").click(function(){Start()});
+            $("#reset").click(function(){Reset()});
+            $("#pause").click(function(){Pause()});
+
+
+            $("#reduceSessionTime").click(function(){reduceSession()});
+            $("#increaseSessionTime").click(function(){increaseSession()});
+            $("#reduceBreakTime").click(function(){reduceBreak()});
+            $("#increaseBreakTime").click(function(){increaseBreak()});
+           
+        });
+    </script>
+
+   <style>
+	p {
+	  text-align: center;
+	  font-size: 42px;
+	}
+	.row{
+	  text-align: center;
+	}
+	.container{
+	  width: 80%;
+	  height: 100px;
+	  margin-top: 5%;
+	}
+	body{
+    font-family: 'Orbitron', sans-serif;
+	  background: #171A21;
+	  color: white;
+	}
+  label{
+    text-align: center;
+    font-size: 24px;
+  }
+  </style>
+  </head>
+  <body>
+    
+    <div class="container text-center">
+      <h2>FCC-Pomodoro clock-challenge</h2>
+      <div class="row">
+        <div class="col-md-6">
+          <label >Session (1 - 25 min)</label><br>
+          <button id="reduceSessionTime" class="btn btn-success">-</button>
+          <label id="sessionTime">25</label>
+          <button id="increaseSessionTime" class="btn btn-success">+</button>
+        </div>
+        <div class="col-md-6">
+          <label >Break (1 - 25 min)</label><br>
+          <button id="reduceBreakTime" class="btn btn-success">-</button>
+          <label id="breakTime">5</label>
+          <button id="increaseBreakTime" class="btn btn-success">+</button>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+          <p id="session"></p>
+          <label id="statusLabel"> </label><br>
+          <button id="reset" class="btn btn-success">RESET</button>
+          <button id="start" class="btn btn-danger">START</button>
+          <button id="pause" class="btn btn-primary">PAUSE</button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
